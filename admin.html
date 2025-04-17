@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    input {
+      padding: 5px;
+      margin-right: 10px;
+    }
+    button {
+      padding: 6px 12px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    table {
+      width: 100%;
+      margin-top: 15px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    .section {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Dashboard</h1>
+
+  <!-- Add Staff -->
+  <div class="section">
+    <h2>Add Staff</h2>
+    <div class="form-group">
+      <input type="text" id="staffName" placeholder="Staff Name" />
+      <input type="text" id="staffSubject" placeholder="Subject" />
+      <button onclick="addStaff()">Add Staff</button>
+    </div>
+    <table id="staffTable">
+      <thead>
+        <tr><th>Name</th><th>Subject</th><th>Actions</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Add Student -->
+  <div class="section">
+    <h2>Add Student</h2>
+    <div class="form-group">
+      <input type="text" id="studentId" placeholder="Student ID" />
+      <input type="text" id="studentName" placeholder="Student Name" />
+      <button onclick="addStudent()">Add Student</button>
+    </div>
+    <table id="studentTable">
+      <thead>
+        <tr><th>ID</th><th>Name</th><th>Actions</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    // ========== Staff Logic ==========
+    function addStaff() {
+      const name = document.getElementById("staffName").value.trim();
+      const subject = document.getElementById("staffSubject").value.trim();
+      if (!name || !subject) return alert("Fill all staff fields!");
+
+      const staffList = getStored("staffList");
+      staffList.push({ name, subject });
+      saveStored("staffList", staffList);
+      renderStaffTable();
+      document.getElementById("staffName").value = '';
+      document.getElementById("staffSubject").value = '';
+    }
+
+    function renderStaffTable() {
+      const staffTable = document.querySelector("#staffTable tbody");
+      staffTable.innerHTML = "";
+      const staffList = getStored("staffList");
+      staffList.forEach((s, i) => {
+        const row = staffTable.insertRow();
+        row.innerHTML = `
+          <td contenteditable oninput="updateStaff(${i}, 'name', this.innerText)">${s.name}</td>
+          <td contenteditable oninput="updateStaff(${i}, 'subject', this.innerText)">${s.subject}</td>
+          <td><button onclick="deleteStaff(${i})">Delete</button></td>
+        `;
+      });
+    }
+
+    function updateStaff(index, field, value) {
+      const staffList = getStored("staffList");
+      staffList[index][field] = value;
+      saveStored("staffList", staffList);
+    }
+
+    function deleteStaff(index) {
+      const staffList = getStored("staffList");
+      staffList.splice(index, 1);
+      saveStored("staffList", staffList);
+      renderStaffTable();
+    }
+
+    // ========== Student Logic ==========
+    function addStudent() {
+      const id = document.getElementById("studentId").value.trim();
+      const name = document.getElementById("studentName").value.trim();
+      if (!id || !name) return alert("Fill all student fields!");
+
+      const studentList = getStored("studentList");
+      studentList.push({ id, name });
+      saveStored("studentList", studentList);
+      renderStudentTable();
+      document.getElementById("studentId").value = '';
+      document.getElementById("studentName").value = '';
+    }
+
+    function renderStudentTable() {
+      const studentTable = document.querySelector("#studentTable tbody");
+      studentTable.innerHTML = "";
+      const studentList = getStored("studentList");
+      studentList.forEach((s, i) => {
+        const row = studentTable.insertRow();
+        row.innerHTML = `
+          <td contenteditable oninput="updateStudent(${i}, 'id', this.innerText)">${s.id}</td>
+          <td contenteditable oninput="updateStudent(${i}, 'name', this.innerText)">${s.name}</td>
+          <td><button onclick="deleteStudent(${i})">Delete</button></td>
+        `;
+      });
+    }
+
+    function updateStudent(index, field, value) {
+      const studentList = getStored("studentList");
+      studentList[index][field] = value;
+      saveStored("studentList", studentList);
+    }
+
+    function deleteStudent(index) {
+      const studentList = getStored("studentList");
+      studentList.splice(index, 1);
+      saveStored("studentList", studentList);
+      renderStudentTable();
+    }
+
+    // ========== Local Storage Utils ==========
+    function getStored(key) {
+      return JSON.parse(localStorage.getItem(key)) || [];
+    }
+
+    function saveStored(key, data) {
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    // ========== Init ==========
+    window.onload = () => {
+      renderStaffTable();
+      renderStudentTable();
+    };
+  </script>
+</body>
+</html>
