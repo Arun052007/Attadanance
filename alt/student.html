@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Student Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Student Dashboard</h1>
+
+    <p><strong>Name:</strong> Priya Sharma</p>
+    <p><strong>ID:</strong> 21CS102</p>
+
+    <h2>Attendance</h2>
+    <table>
+      <tr><th>Subject</th><th>Attendance %</th><th>Status</th></tr>
+      <tr><td>Math</td><td>85%</td><td>Present</td></tr>
+      <tr><td>Physics</td><td>70%</td><td>Absent</td></tr>
+    </table>
+
+    <h2>Scan QR to Mark Attendance</h2>
+    <button onclick="startScanner()">Scan QR Code</button>
+    <div id="qr-reader" style="width: 300px; margin: 20px auto;"></div>
+    <p id="scan-result"></p>
+  </div>
+
+  <script>
+    function startScanner() {
+      const qrReader = new Html5Qrcode("qr-reader");
+      const config = { fps: 10, qrbox: 250 };
+
+      qrReader.start(
+        { facingMode: "environment" },
+        config,
+        qrMessage => {
+          document.getElementById("scan-result").innerText = "QR Scanned: " + qrMessage;
+          qrReader.stop();
+        },
+        err => {
+          console.warn("QR Scan Error", err);
+        }
+      ).catch(err => {
+        document.getElementById("scan-result").innerText = "Camera Error: " + err;
+      });
+    }
+  </script>
+</body>
+</html>
+

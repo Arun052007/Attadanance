@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Staff Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Staff Dashboard</h1>
+
+    <!-- Timetable -->
+    <section>
+      <h2>Timetable</h2>
+      <table>
+        <thead>
+          <tr><th>Day</th><th>Subject</th><th>Time</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Monday</td><td>Math</td><td>10:00–11:00</td></tr>
+          <tr><td>Tuesday</td><td>Math</td><td>11:00–12:00</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- QR Code Section -->
+    <section style="margin-top: 30px;">
+      <h2>Generate QR for Session</h2>
+      <button onclick="generateQR()">Generate QR Code</button>
+      <div id="qr-section" style="display:none; text-align:center; margin-top:20px;">
+        <canvas id="qr-code"></canvas>
+        <p id="timer">QR code valid for 5:00</p>
+      </div>
+    </section>
+
+    <!-- Attendance Table -->
+    <section style="margin-top: 40px;">
+      <h2>Attendance Sheet</h2>
+      <table id="attendanceTable">
+        <thead>
+          <tr><th>Student ID</th><th>Name</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td contenteditable="true">21CS102</td>
+            <td contenteditable="true">Priya Sharma</td>
+            <td>
+              <select>
+                <option value="Present" selected>Present</option>
+                <option value="Absent">Absent</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td contenteditable="true">21CS105</td>
+            <td contenteditable="true">Rahul Kumar</td>
+            <td>
+              <select>
+                <option value="Present">Present</option>
+                <option value="Absent" selected>Absent</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <button onclick="downloadAttendance()" style="margin-top: 20px;">Download Attendance CSV</button>
+    </section>
+  </div>
+
+  <script>
+    // QR Code + Timer
+    let qr, timerInterval;
+    function generateQR() {
+      const qrSection = document.getElementById("qr-section");
+      const canvas = document.getElementById("qr-code");
+
+      const qrData = "session_" + Date.now(); // Unique session data
+      qrSection.style.display = "block";
+
+      qr = new QRious({
+        element: canvas,
+        size: 200,
+        value: qrData
+      });
+
+      let seconds = 300; // 5 minutes
+      updateTimer(seconds);
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        seconds--;
+        if (seconds <= 0) {
+          clearInterval(timerInterval);
+          qrSection.style.display = "none";
+          alert("QR code has expired.");
+        } else {
+          updateTimer(seconds);
+        }
+      }, 1000);
+    }
+
+    function updateTimer(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = seconds % 60;
+      document.getElementById("timer").innerText =
+        `QR code valid for ${min}:${sec < 10 ? '0' : ''}${sec}`;
+    }
+
+    // Download attendance as CSV
+    function downloadAttendance() {
+      const table = document.getElementById("attendanceTable");
+      let csv = [];
+      for (let row of table.rows) {
+        let rowData = [];
+        for (let cell of row.cells) {
+          if (cell.querySelector("select")) {
+            rowData.push(cell.querySelector("select").value);
+          } else {
+            rowData.push(cell.innerText);
+          }
+        }
+        csv.push(rowData.join(","));
+      }
+      const csvContent = "data:text/csv;charset=utf-8," + csv.join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "attendance.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
